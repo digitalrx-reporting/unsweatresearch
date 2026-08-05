@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UNSWEAT — Marketing & Program Report</title>
+<style>
+  :root{
+    --ink:#0A2540; --steel:#14304F; --gold:#C9A25D; --teal:#2C6E7F; --clay:#B5533C;
+    --bg:#FAF9F6; --panel:#FFFFFF; --text:#3C4450; --textlight:#5B6472; --line:#E3E1DA;
+    --mono:'SF Mono','IBM Plex Mono',Consolas,'Courier New',monospace;
+    --serif:Georgia,'Iowan Old Style','Times New Roman',serif;
+    --sans:'Helvetica Neue',Arial,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14.5px;line-height:1.55;}
+  a{color:inherit;text-decoration:none;}
+  .shell{display:flex;min-height:100vh;}
+
+  .sidebar{width:264px;flex-shrink:0;background:var(--ink);color:#DCE3EA;position:fixed;top:0;left:0;bottom:0;
+    display:flex;flex-direction:column;border-right:4px solid var(--gold);z-index:10;}
+  .brand{padding:30px 26px 18px;border-bottom:1px solid rgba(255,255,255,0.12);}
+  .brand .mark{font-family:var(--serif);font-size:21px;color:#fff;font-weight:700;letter-spacing:0.5px;}
+  .brand .sub{margin-top:5px;font-size:10.5px;letter-spacing:1.4px;text-transform:uppercase;color:var(--gold);}
+  .brand .meta{margin-top:12px;font-size:10.5px;color:#8CA0B3;font-family:var(--mono);}
+  nav.toc{padding:14px 0;flex:1;overflow-y:auto;}
+  nav.toc .item{display:block;padding:10px 26px;font-size:12.5px;color:#B9C6D2;border-left:3px solid transparent;cursor:pointer;transition:all .15s;background:none;border-top:none;border-right:none;border-bottom:none;width:100%;text-align:left;font-family:inherit;}
+  nav.toc .item .num{font-family:var(--mono);color:var(--gold);margin-right:9px;font-size:10.5px;}
+  nav.toc .item:hover{color:#fff;background:rgba(255,255,255,0.04);}
+  nav.toc .item.active{color:#fff;border-left-color:var(--gold);background:rgba(255,255,255,0.06);font-weight:600;}
+  .sidebar-foot{padding:16px 26px 22px;border-top:1px solid rgba(255,255,255,0.12);font-size:10.5px;color:#7C90A4;}
+  .sidebar-foot .bar-bg{height:5px;width:100%;background:rgba(255,255,255,0.12);border-radius:3px;overflow:hidden;margin:7px 0 5px;}
+  .sidebar-foot .bar-fill{height:100%;background:var(--gold);width:20%;}
+
+  main{margin-left:264px;width:100%;padding:0;}
+  .page{display:none;padding:40px 60px 70px;max-width:1160px;}
+  .page.active{display:block;}
+  .page-head{margin-bottom:22px;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;}
+  .page-head .eyebrow{font-family:var(--mono);font-size:11px;color:var(--gold);letter-spacing:1px;}
+  .page-head h2{font-family:var(--serif);font-size:26px;color:var(--ink);margin:0;}
+  .page-head .lede{color:var(--textlight);font-size:13px;}
+
+  h3.sub{font-family:var(--serif);font-size:16px;color:var(--ink);margin:30px 0 12px;}
+  p{margin:0 0 10px;}
+  .exhibit-label{font-family:var(--mono);font-size:10.5px;color:var(--teal);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:8px;font-weight:700;}
+
+  .insight{background:#fff;border:1px solid var(--line);border-left:4px solid var(--gold);padding:14px 18px;margin:16px 0;font-size:13px;}
+  .insight .tag{font-family:var(--mono);font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:1px;font-weight:700;display:block;margin-bottom:4px;}
+
+  .grid{display:grid;gap:14px;}
+  .grid-2{grid-template-columns:1fr 1fr;}
+  .grid-3{grid-template-columns:1fr 1fr 1fr;}
+
+  .card{background:var(--panel);border:1px solid var(--line);padding:16px 18px;}
+  .card h4{margin:0 0 6px;font-size:14px;color:var(--ink);font-family:var(--serif);}
+  .card .kicker{font-size:10px;text-transform:uppercase;letter-spacing:0.6px;color:var(--teal);font-weight:700;margin-bottom:5px;}
+  .card ul{margin:6px 0 0;padding-left:16px;}
+  .card li{margin-bottom:4px;font-size:12.5px;color:var(--textlight);}
+  .card p{font-size:12.5px;color:var(--textlight);margin:0;}
+
+  table{width:100%;border-collapse:collapse;font-size:12.5px;background:#fff;}
+  th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);}
+  th{font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--textlight);border-bottom:2px solid var(--ink);font-weight:700;}
+  td.num,th.num{text-align:right;font-family:var(--mono);}
+  tr.loss td{color:var(--clay);}
+  tr.highlight td{background:#FBF4E6;font-weight:600;}
+  .table-wrap{overflow-x:auto;border:1px solid var(--line);margin-bottom:8px;}
+
+  .matrix-wrap{overflow-x:auto;border:1px solid var(--line);background:#fff;margin-bottom:8px;}
+  table.matrix{min-width:880px;}
+  table.matrix th{white-space:nowrap;font-size:9.5px;}
+  table.matrix td{text-align:center;}
+  table.matrix td.brand-name{text-align:left;font-weight:600;color:var(--ink);white-space:nowrap;}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--line);display:inline-block;}
+  .op-cell{background:#FBF4E6;}
+  .dot.op-on{background:var(--gold);}
+  .dot.on{background:var(--teal);}
+  .footnote{font-size:11px;color:var(--textlight);margin-top:2px;}
+
+  .chart-box{background:#fff;border:1px solid var(--line);padding:18px 20px;}
+  .bar-row{display:flex;align-items:center;margin-bottom:7px;gap:8px;}
+  .bar-row .label{width:140px;font-size:11.5px;color:var(--textlight);flex-shrink:0;text-align:right;}
+  .bar-row .track{flex:1;background:#F0EEE7;height:16px;position:relative;border-radius:2px;}
+  .bar-row .fill{height:100%;background:var(--teal);border-radius:2px 0 0 2px;}
+  .bar-row .fill.gold{background:var(--gold);}
+  .bar-row .fill.clay{background:var(--clay);}
+  .bar-row .val{font-family:var(--mono);font-size:11px;margin-left:6px;color:var(--ink);width:74px;}
+
+  /* status summary (no chart) */
+  .status-summary{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:22px;}
+  .status-pill{border:1px solid var(--line);background:#fff;padding:8px 16px;font-size:12px;display:flex;align-items:center;gap:8px;}
+  .status-pill .swatch{width:9px;height:9px;border-radius:50%;}
+  .status-pill b{font-family:var(--mono);color:var(--ink);}
+
+  .phase-block{border:1px solid var(--line);background:#fff;margin-bottom:10px;}
+  .phase-block-head{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;background:#F5F3EE;border-bottom:1px solid var(--line);}
+  .phase-block-head .ph-name{font-family:var(--serif);font-size:14.5px;color:var(--ink);}
+  .phase-block-head .ph-progress{font-family:var(--mono);font-size:11px;color:var(--textlight);}
+  table.task-table{table-layout:fixed;}
+  table.task-table th:nth-child(1), table.task-table td:nth-child(1){width:27%;}
+  table.task-table th:nth-child(2), table.task-table td:nth-child(2){width:13%;}
+  table.task-table th:nth-child(3), table.task-table td:nth-child(3){width:8%;}
+  table.task-table th:nth-child(4), table.task-table td:nth-child(4){width:13%;}
+  table.task-table th:nth-child(5), table.task-table td:nth-child(5){width:39%;}
+  table.task-table td, table.task-table th{font-size:12px;padding:7px 12px;word-wrap:break-word;}
+  table.task-table td.signal{color:var(--teal);font-size:11.5px;}
+  .status-badge{font-size:9.5px;text-transform:uppercase;letter-spacing:0.3px;padding:2px 8px;border-radius:20px;font-weight:700;white-space:nowrap;display:inline-block;}
+  .status-Completed{background:#E4EEE7;color:#3D7A56;}
+  .status-In-Progress{background:#FBF4E6;color:#96762E;}
+  .status-On-Queue{background:#EAEEF3;color:#4C6480;}
+  .status-Not-Started{background:#F5E9E6;color:var(--clay);}
+
+  /* market landscape sub-tabs */
+  .subtab-bar{position:sticky;top:0;background:#fff;z-index:4;border-bottom:1px solid var(--line);
+    margin:-40px -60px 24px;padding:16px 60px 12px;display:flex;gap:6px;flex-wrap:wrap;}
+  .subtab-btn{border:1px solid var(--line);background:#F5F3EE;color:var(--textlight);font-size:12px;padding:7px 14px;
+    cursor:pointer;font-family:var(--sans);border-radius:2px;}
+  .subtab-btn:hover{background:#EAE7DE;}
+  .subtab-btn.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+  .subtab-panel{display:none;}
+  .subtab-panel.active{display:block;}
+
+  @media (max-width: 900px){
+    .sidebar{display:none;} main{margin-left:0;}
+    .page{padding:24px 20px;}
+    .subtab-bar{margin:-24px -20px 20px;padding:14px 20px 10px;}
+    .grid-2,.grid-3{grid-template-columns:1fr;}
+    table.task-table{table-layout:auto;}
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="mark">UNSWEAT</div>
+      <div class="sub">Marketing &amp; Program Report</div>
+      <div class="meta">Confidential — Working Draft<br>Updated Aug 6, 2026</div>
+    </div>
+    <nav class="toc" id="toc">
+      <button class="item active" data-target="roadmap"><span class="num">01</span>Roadmap &amp; Status</button>
+      <button class="item" data-target="product"><span class="num">02</span>Product &amp; Formulation</button>
+      <button class="item" data-target="market"><span class="num">03</span>Market Landscape</button>
+      <button class="item" data-target="customers"><span class="num">04</span>Customer Segments</button>
+      <button class="item" data-target="economics"><span class="num">05</span>Pricing &amp; Unit Economics</button>
+    </nav>
+    <div class="sidebar-foot">
+      PROGRAM COMPLETION
+      <div class="bar-bg"><div class="bar-fill"></div></div>
+      8 of 35 workstreams complete
+    </div>
+  </aside>
+
+  <main>
+
+    <!-- ============ 01 ROADMAP ============ -->
+    <div class="page active" id="page-roadmap">
+      <div class="page-head">
+        <div class="eyebrow">SECTION 01</div>
+        <h2>Roadmap &amp; Status</h2>
+        <span class="lede">10 phases · 35 workstreams · status reconciled against Slack activity</span>
+      </div>
+
+      <div class="status-summary">
+        <div class="status-pill"><span class="swatch" style="background:#3D7A56;"></span>Completed <b>8</b></div>
+        <div class="status-pill"><span class="swatch" style="background:#96762E;"></span>In Progress <b>10</b></div>
+        <div class="status-pill"><span class="swatch" style="background:#4C6480;"></span>On Queue <b>10</b></div>
+        <div class="status-pill"><span class="swatch" style="background:#B5533C;"></span>Not Started <b>7</b></div>
+      </div>
+
+      <div id="phase-container"></div>
+    </div>
+
+    <!-- ============ 02 PRODUCT & FORMULATION ============ -->
+    <div class="page" id="page-product">
+      <div class="page-head">
+        <div class="eyebrow">SECTION 02</div>
+        <h2>Product &amp; Formulation</h2>
+        <span class="lede">From Slack — how the product changed since February</span>
+      </div>
+
+      <h3 class="sub">Formulation timeline</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th style="width:110px;">Date</th><th>Event</th></tr></thead>
+          <tbody>
+            <tr><td style="font-family:var(--mono);">Feb</td><td>Concept: 0.02% hypochlorous acid (HOCl) + 99.98% water, disinfectant-style wipe.</td></tr>
+            <tr><td style="font-family:var(--mono);">Mar–Apr</td><td>HOCl stability testing stalls — the compound degrades in transit; US lab testing (Nelson Labs, Invitro Intl, CTI) proves expensive and slow.</td></tr>
+            <tr><td style="font-family:var(--mono);">Apr 11</td><td>Team splits on direction: "Cetaphil generic face wipes" vs. "purple HOCl wipes." <strong>unsweat.co purchased same day.</strong></td></tr>
+            <tr><td style="font-family:var(--mono);">Jun 25</td><td>Manufacturer certifications received: CE, FDA, GMPC.</td></tr>
+            <tr><td style="font-family:var(--mono);">Jul 24</td><td>Formulation benchmarked directly against Cetaphil Cleansing Cloths — gaps identified (below).</td></tr>
+            <tr><td style="font-family:var(--mono);">Aug 3–4</td><td>New factory samples under review; separate "Cleaning wipes" and "Cooling wipes" ingredient lines both in play.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="sub">Cetaphil benchmark — what's different</h3>
+      <div class="grid grid-2">
+        <div class="card"><div class="kicker">Overlap</div><p>Aloe extract, panthenol, citric acid. Both fragrance-free.</p></div>
+        <div class="card"><div class="kicker">Difference</div><p>UNSWEAT skips glycerin, using 1,2-hexanediol/methylpropanediol instead; leans on witch hazel, chamomile, centella rather than Cetaphil's niacinamide/vitamin E.</p></div>
+      </div>
+      <div class="insight">
+        <span class="tag">Flag — open as of Aug 4</span>
+        UNSWEAT's preservative is benzalkonium chloride — effective, but higher irritation potential than Cetaphil's gentler phenoxyethanol/multi-acid system. Flagged directly against the "safe for facial use" / "gentle cleansing" claim the brand wants to make; also missing the makeup/oil-removal ingredients Cetaphil has. Resolution pending with the manufacturer.
+      </div>
+
+      <h3 class="sub">Regulatory &amp; labeling constraints</h3>
+      <div class="grid grid-2">
+        <div class="card"><div class="kicker">Do Not Flush</div><p>Required by CA, OR, IL, NJ, WA, CO for premoistened nonwoven wipes marketed for facial/personal use — symbol + text, ≥2% of principal panel. Federal WIPPES Act passed the Senate, not yet law. Avoid "flushable / sewer-safe / septic-safe" claims.</p></div>
+        <div class="card"><div class="kicker">Copy restrictions</div><p>Avoid: "antibacterial," "kills germs," "relieves ___." Use "sanitize / sterilize" instead. Required on-pack: ingredient list, "For External Use – Avoid Contact with Eyes," "Made in China."</p></div>
+      </div>
+
+      <h3 class="sub">Packaging &amp; SKU status</h3>
+      <p style="font-size:13px;color:var(--textlight);">Final design approved 7/28 (clean layout, neon-green/purple-blue palette, wave motif). Plastic-lid color print adds $0.08/unit + ~$5,900 mold fee, so the cover ships as a printed sticker (7-day lead time). Barcode <strong>884400729866</strong> assigned 7/30. Two SKUs in flight: <strong>Cooling wipes</strong> and <strong>Cleaning/facial wipes</strong> on separate ingredient specs.</p>
+    </div>
+
+    <!-- ============ 03 MARKET LANDSCAPE ============ -->
+    <div class="page" id="page-market">
+      <div class="subtab-bar" id="subtab-bar">
+        <button class="subtab-btn active" data-tab="feature">Compare: Feature</button>
+        <button class="subtab-btn" data-tab="ingredient">Ingredient</button>
+        <button class="subtab-btn" data-tab="price">Price</button>
+        <button class="subtab-btn" data-tab="channel">Channel</button>
+        <button class="subtab-btn" data-tab="paidads">Paid Ads</button>
+        <button class="subtab-btn" data-tab="engagement">Engagement</button>
+        <button class="subtab-btn" data-tab="retention">Retention</button>
+        <button class="subtab-btn" data-tab="swot">SWOT</button>
+      </div>
+
+      <div class="page-head">
+        <div class="eyebrow">SECTION 03</div>
+        <h2>Market Landscape</h2>
+        <span class="lede">17 brands benchmarked on formulation, price, channel, and retention</span>
+      </div>
+
+      <div class="subtab-panel active" id="tab-feature">
+        <div class="exhibit-label">Exhibit 1 — Feature comparison</div>
+        <div class="matrix-wrap">
+          <table class="matrix">
+            <thead><tr><th>Brand</th><th>99%+ Water</th><th>Plant-Based</th><th>Frag-Free</th><th>Sensitive Skin</th><th>EWG</th>
+              <th class="op-cell">XL</th><th class="op-cell">Cooling</th><th class="op-cell">Deodorizing</th><th class="op-cell">Indiv. Wrapped</th></tr></thead>
+            <tbody id="matrix-body"></tbody>
+          </table>
+        </div>
+        <p class="footnote">Gold columns = fitness-relevant attributes. Dude Wipes is the only brand with any of the four.</p>
+      </div>
+
+      <div class="subtab-panel" id="tab-ingredient">
+        <div class="exhibit-label">Exhibit 2 — Ingredient comparison</div>
+        <div class="matrix-wrap">
+          <table class="matrix">
+            <thead><tr><th>Brand</th><th>Water</th><th>Aloe Vera</th><th>Chamomile</th><th>Glycerin</th><th>Citric Acid</th><th>Vitamin E</th><th>Oat Extract</th><th>Cucumber Extract</th></tr></thead>
+            <tbody id="ingredient-body"></tbody>
+          </table>
+        </div>
+        <p class="footnote">UNSWEAT's own formula (Section 02) uses chamomile + witch hazel + centella instead of Cetaphil's vitamin E/niacinamide route — closer to Mama Bear's and Kirkland's ingredient profile than to Cetaphil's.</p>
+      </div>
+
+      <div class="subtab-panel" id="tab-price">
+        <div class="exhibit-label">Exhibit 3 — 48-pack price, low to high</div>
+        <div class="chart-box" id="price-chart"></div>
+        <p class="footnote">Full pricing analysis, category benchmarks by pack size, and a channel-by-channel recommendation are in Section 05 — Pricing &amp; Unit Economics.</p>
+      </div>
+
+      <div class="subtab-panel" id="tab-channel">
+        <div class="exhibit-label">Exhibit 4 — Sales channel presence</div>
+        <div class="matrix-wrap">
+          <table class="matrix">
+            <thead><tr><th>Brand</th><th>Amazon</th><th>Walmart</th><th>Target</th><th>DTC</th></tr></thead>
+            <tbody id="channel-body"></tbody>
+          </table>
+        </div>
+        <p class="footnote">15 of 17 sell on Amazon; only 8 run a DTC storefront — Coterie, Honest, Dude Wipes, Seventh Gen, Burt's Bees, Babyganics, Charmin, Healthybaby.</p>
+      </div>
+
+      <div class="subtab-panel" id="tab-paidads">
+        <div class="exhibit-label">Exhibit 5 — Paid media presence</div>
+        <div class="matrix-wrap">
+          <table class="matrix">
+            <thead><tr><th>Brand</th><th>Amazon Ads</th><th>Meta Ads</th><th>Google Ads</th><th>TikTok Ads</th><th>TV Ads</th></tr></thead>
+            <tbody id="paidads-body"></tbody>
+          </table>
+        </div>
+        <p class="footnote">TikTok Ads used by 7 of 17 — the smallest footprint of any channel, consistent with its poor unit economics in Section 05.</p>
+      </div>
+
+      <div class="subtab-panel" id="tab-engagement">
+        <div class="exhibit-label">Exhibit 6 — Engagement strategy</div>
+        <div class="matrix-wrap">
+          <table class="matrix">
+            <thead><tr><th>Brand</th><th>Influencer</th><th>UGC</th><th>Newsletters</th><th>Giveaways</th><th>Educational Content</th></tr></thead>
+            <tbody id="engagement-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subtab-panel" id="tab-retention">
+        <div class="exhibit-label">Exhibit 7 — Retention &amp; promotion mechanics</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Brand</th><th>Subscription</th><th>Free shipping</th><th>Volume discount</th><th>Loyalty</th><th>Bundles</th><th>Sampling</th></tr></thead>
+            <tbody id="retention-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="subtab-panel" id="tab-swot">
+        <div class="exhibit-label">Exhibit 8 — Competitive SWOT</div>
+        <p class="footnote" style="margin-bottom:14px;">Cetaphil (facial-care benchmark), Dude Wipes (cooling comparable), WaterWipes (purity), Coterie (premium DTC)</p>
+        <div class="grid grid-2" id="swot-grid"></div>
+      </div>
+    </div>
+
+    <!-- ============ 04 CUSTOMER SEGMENTS ============ -->
+    <div class="page" id="page-customers">
+      <div class="page-head">
+        <div class="eyebrow">SECTION 04</div>
+        <h2>Customer Segments</h2>
+        <span class="lede">Six profiled segments</span>
+      </div>
+      <div class="grid grid-3" id="persona-grid"></div>
+    </div>
+
+    <!-- ============ 05 PRICING & UNIT ECONOMICS ============ -->
+    <div class="page" id="page-economics">
+      <div class="page-head">
+        <div class="eyebrow">SECTION 05</div>
+        <h2>Pricing &amp; Unit Economics</h2>
+        <span class="lede">MOQ 30,000 units · landed cost $0.646/pack</span>
+      </div>
+
+      <div class="grid grid-3">
+        <div class="card"><div class="kicker">Landed cost</div><h4 style="font-family:var(--mono);font-size:22px;">$0.646<span style="font-size:12px;">/pack</span></h4></div>
+        <div class="card"><div class="kicker">CM, DTC channels</div><h4 style="font-family:var(--mono);font-size:22px;">83.85%</h4></div>
+        <div class="card"><div class="kicker">Best gross profit</div><h4 style="font-family:var(--mono);font-size:22px;">Distributor</h4></div>
+      </div>
+
+      <h3 class="sub">Where UNSWEAT sits vs. the category, by pack size</h3>
+      <div class="exhibit-label">Exhibit 9 — Category price range vs. UNSWEAT's modeled price, per pack</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Pack size</th><th class="num">Category Min</th><th class="num">Category Avg</th><th class="num">Category Max</th><th class="num">UNSWEAT Amazon/Shopify/TikTok</th><th class="num">UNSWEAT Distributor</th><th class="num">UNSWEAT Wholesale</th></tr></thead>
+          <tbody>
+            <tr><td>20</td><td class="num">$2.49</td><td class="num">$4.55</td><td class="num">$6.99</td><td class="num">$4.00 / $3.80 / $3.60</td><td class="num">$2.40</td><td class="num">$1.70</td></tr>
+            <tr class="highlight"><td>48</td><td class="num">$3.49</td><td class="num">$6.62</td><td class="num">$9.99</td><td class="num">$9.60 / $9.12 / $8.64</td><td class="num">$5.76</td><td class="num">$4.08</td></tr>
+            <tr><td>72</td><td class="num">$4.49</td><td class="num">$8.05</td><td class="num">$12.99</td><td class="num">$14.40 / $13.68 / $12.96</td><td class="num">$8.64</td><td class="num">$6.12</td></tr>
+            <tr><td>80</td><td class="num">$4.99</td><td class="num">$8.96</td><td class="num">$14.99</td><td class="num">$16.00 / $15.20 / $14.40</td><td class="num">$9.60</td><td class="num">$6.80</td></tr>
+            <tr><td>100</td><td class="num">$5.49</td><td class="num">$10.40</td><td class="num">$17.99</td><td class="num">$20.00 / $19.00 / $18.00</td><td class="num">$12.00</td><td class="num">$8.50</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="insight">
+        <span class="tag">Pricing is inconsistent across sizes</span>
+        At the 20-count size, UNSWEAT's DTC price ($4.00) sits close to the category average ($4.55) — mid-market. But by the 48-count size, UNSWEAT ($9.60) is priced above the category average ($6.62) and near the category max ($9.99) — effectively premium. Either the multi-pack discount curve needs to steepen to stay mid-market at scale, or the premium jump needs a stated reason (clinical-grade claim, cooling functional benefit) strong enough to justify sitting near Coterie/Healthybaby territory.
+      </div>
+
+      <h3 class="sub">Gross profit by channel, 30,000 units</h3>
+      <div class="chart-box" id="profit-chart"></div>
+      <div class="insight">
+        <span class="tag">Read</span>
+        TikTok's $20 CPA and $120K ad spend erase its $100.6K contribution margin — net loss. Distributor nets the most ($67,719) on the lowest per-pack price, via near-zero fees/marketing.
+      </div>
+
+      <h3 class="sub">Channel cost structure</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th></th><th class="num">Amazon</th><th class="num">Shopify</th><th class="num">TikTok</th><th class="num">Distributor</th><th class="num">Wholesale</th></tr></thead>
+          <tbody>
+            <tr><td>Price/pack</td><td class="num">$4.00</td><td class="num">$4.00</td><td class="num">$4.00</td><td class="num">$3.00</td><td class="num">$2.00</td></tr>
+            <tr><td>Platform fee</td><td class="num">15%</td><td class="num">3%</td><td class="num">8%</td><td class="num">—</td><td class="num">—</td></tr>
+            <tr><td>CPA</td><td class="num">$3.00</td><td class="num">$10.00</td><td class="num">$20.00</td><td class="num">—</td><td class="num">—</td></tr>
+            <tr><td>Marketing $</td><td class="num">$18,000</td><td class="num">$60,000</td><td class="num">$120,000</td><td class="num">$0</td><td class="num">$0</td></tr>
+            <tr class="loss"><td>Gross profit</td><td class="num">$57,000</td><td class="num">$29,400</td><td class="num">-$36,600</td><td class="num">$67,719</td><td class="num">$38,619</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+/* ---------------- DATA ---------------- */
+const competitors = [
+  {name:"WaterWipes", water:1,plant:1,frag:1,sens:1,ewg:1, xl:0,cool:0,deo:0,wrap:0},
+  {name:"The Honest Company", water:0,plant:1,frag:1,sens:0,ewg:1, xl:0,cool:0,deo:0,wrap:0},
+  {name:"Mama Bear", water:1,plant:0,frag:1,sens:0,ewg:0, xl:0,cool:0,deo:0,wrap:0},
+  {name:"Coterie", water:0,plant:1,frag:1,sens:0,ewg:1, xl:0,cool:0,deo:0,wrap:0},
+  {name:"Pampers", water:1,plant:0,frag:1,sens:1,ewg:0, xl:0,cool:0,deo:0,wrap:0},
+  {name:"Huggies", water:1,plant:1,frag:1,sens:0,ewg:0, xl:0,cool:0,deo:0,wrap:0},
+  {name:"Hello Bello", water:1,plant:1,frag:1,sens:0,ewg:0, xl:0,cool:0,deo:0,wrap:0},
+  {name:"Healthybaby", water:1,plant:1,frag:1,sens:0,ewg:1, xl:0,cool:0,deo:0,wrap:0},
+  {name:"Seventh Generation", water:0,plant:1,frag:1,sens:0,ewg:0, xl:0,cool:0,deo:0,wrap:0},
+  {name:"Burt's Bees Baby", water:0,plant:1,frag:1,sens:1,ewg:0, xl:0,cool:0,deo:0,wrap:0},
+  {name:"Babyganics", water:0,plant:1,frag:1,sens:0,ewg:0, xl:0,cool:0,deo:0,wrap:0},
+  {name:"Kirkland Signature", water:0,plant:1,frag:1,sens:0,ewg:0, xl:0,cool:0,deo:0,wrap:0},
+  {name:"up&up", water:0,plant:1,frag:1,sens:0,ewg:0, xl:0,cool:0,deo:0,wrap:0},
+  {name:"Dude Wipes", water:0,plant:1,frag:1,sens:0,ewg:0, xl:1,cool:1,deo:1,wrap:1},
+  {name:"Cottonelle", water:0,plant:1,frag:0,sens:0,ewg:0, xl:0,cool:0,deo:0,wrap:0},
+  {name:"Charmin", water:0,plant:1,frag:0,sens:0,ewg:0, xl:0,cool:0,deo:0,wrap:0},
+  {name:"Cetaphil Wipes", water:0,plant:0,frag:1,sens:1,ewg:0, xl:0,cool:0,deo:0,wrap:0},
+];
+
+const ingredients = [
+  {name:"WaterWipes", water:1,aloe:0,cham:0,glyc:0,citric:0,vite:0,oat:0,cuke:0},
+  {name:"The Honest Company", water:1,aloe:1,cham:1,glyc:1,citric:1,vite:0,oat:0,cuke:0},
+  {name:"Mama Bear", water:1,aloe:1,cham:1,glyc:0,citric:1,vite:1,oat:0,cuke:1},
+  {name:"Coterie", water:1,aloe:0,cham:0,glyc:1,citric:1,vite:0,oat:0,cuke:0},
+  {name:"Pampers", water:1,aloe:1,cham:1,glyc:1,citric:1,vite:0,oat:0,cuke:0},
+  {name:"Huggies", water:1,aloe:1,cham:0,glyc:0,citric:0,vite:1,oat:0,cuke:0},
+  {name:"Hello Bello", water:1,aloe:1,cham:1,glyc:1,citric:1,vite:0,oat:0,cuke:0},
+  {name:"Healthybaby", water:1,aloe:0,cham:0,glyc:1,citric:1,vite:0,oat:0,cuke:0},
+  {name:"Seventh Generation", water:1,aloe:1,cham:1,glyc:0,citric:1,vite:0,oat:0,cuke:0},
+  {name:"Burt's Bees Baby", water:1,aloe:1,cham:1,glyc:1,citric:1,vite:0,oat:0,cuke:0},
+  {name:"Babyganics", water:1,aloe:1,cham:1,glyc:1,citric:1,vite:0,oat:0,cuke:0},
+  {name:"Kirkland Signature", water:1,aloe:1,cham:1,glyc:0,citric:1,vite:1,oat:0,cuke:0},
+  {name:"up&up", water:1,aloe:1,cham:1,glyc:0,citric:1,vite:1,oat:0,cuke:0},
+  {name:"Dude Wipes", water:1,aloe:1,cham:0,glyc:0,citric:0,vite:1,oat:0,cuke:0},
+  {name:"Cottonelle", water:1,aloe:1,cham:0,glyc:0,citric:0,vite:0,oat:0,cuke:0},
+  {name:"Charmin", water:1,aloe:1,cham:0,glyc:0,citric:0,vite:0,oat:0,cuke:0},
+  {name:"Cetaphil Wipes", water:1,aloe:1,cham:1,glyc:1,citric:1,vite:1,oat:0,cuke:0},
+];
+
+const channels = [
+  {name:"WaterWipes", amazon:1,walmart:1,target:1,dtc:0},
+  {name:"The Honest Company", amazon:1,walmart:1,target:1,dtc:1},
+  {name:"Mama Bear", amazon:1,walmart:0,target:0,dtc:0},
+  {name:"Coterie", amazon:0,walmart:0,target:0,dtc:1},
+  {name:"Pampers", amazon:1,walmart:1,target:1,dtc:0},
+  {name:"Huggies", amazon:1,walmart:1,target:1,dtc:0},
+  {name:"Hello Bello", amazon:1,walmart:1,target:0,dtc:1},
+  {name:"Healthybaby", amazon:0,walmart:0,target:1,dtc:1},
+  {name:"Seventh Generation", amazon:1,walmart:1,target:1,dtc:1},
+  {name:"Burt's Bees Baby", amazon:1,walmart:1,target:1,dtc:1},
+  {name:"Babyganics", amazon:1,walmart:1,target:1,dtc:1},
+  {name:"Kirkland Signature", amazon:1,walmart:0,target:0,dtc:0},
+  {name:"up&up", amazon:0,walmart:0,target:1,dtc:0},
+  {name:"Dude Wipes", amazon:1,walmart:1,target:1,dtc:1},
+  {name:"Cottonelle", amazon:1,walmart:1,target:1,dtc:0},
+  {name:"Charmin", amazon:1,walmart:1,target:1,dtc:1},
+  {name:"Cetaphil Wipes", amazon:1,walmart:1,target:1,dtc:0},
+];
+
+const paidAds = [
+  {name:"WaterWipes", amazon:1,meta:1,google:1,tiktok:0,tv:0},
+  {name:"The Honest Company", amazon:1,meta:1,google:1,tiktok:1,tv:1},
+  {name:"Mama Bear", amazon:1,meta:0,google:0,tiktok:0,tv:0},
+  {name:"Coterie", amazon:0,meta:1,google:1,tiktok:1,tv:0},
+  {name:"Pampers", amazon:1,meta:1,google:1,tiktok:1,tv:1},
+  {name:"Huggies", amazon:1,meta:1,google:1,tiktok:1,tv:1},
+  {name:"Hello Bello", amazon:1,meta:1,google:1,tiktok:1,tv:0},
+  {name:"Healthybaby", amazon:0,meta:1,google:1,tiktok:1,tv:0},
+  {name:"Seventh Generation", amazon:1,meta:1,google:1,tiktok:0,tv:0},
+  {name:"Burt's Bees Baby", amazon:1,meta:1,google:1,tiktok:0,tv:0},
+  {name:"Babyganics", amazon:1,meta:1,google:1,tiktok:0,tv:0},
+  {name:"Kirkland Signature", amazon:0,meta:0,google:0,tiktok:0,tv:0},
+  {name:"up&up", amazon:0,meta:0,google:0,tiktok:0,tv:0},
+  {name:"Dude Wipes", amazon:1,meta:1,google:1,tiktok:1,tv:1},
+  {name:"Cottonelle", amazon:1,meta:1,google:1,tiktok:0,tv:1},
+  {name:"Charmin", amazon:1,meta:1,google:1,tiktok:0,tv:1},
+  {name:"Cetaphil Wipes", amazon:1,meta:1,google:1,tiktok:1,tv:1},
+];
+
+const engagement = [
+  {name:"WaterWipes", inf:1,ugc:1,news:1,give:0,edu:1},
+  {name:"The Honest Company", inf:1,ugc:1,news:1,give:1,edu:1},
+  {name:"Mama Bear", inf:0,ugc:0,news:0,give:0,edu:0},
+  {name:"Coterie", inf:1,ugc:1,news:1,give:0,edu:1},
+  {name:"Pampers", inf:1,ugc:1,news:1,give:1,edu:1},
+  {name:"Huggies", inf:1,ugc:1,news:1,give:1,edu:1},
+  {name:"Hello Bello", inf:1,ugc:1,news:1,give:1,edu:1},
+  {name:"Healthybaby", inf:1,ugc:1,news:1,give:0,edu:1},
+  {name:"Seventh Generation", inf:1,ugc:1,news:1,give:1,edu:1},
+  {name:"Burt's Bees Baby", inf:1,ugc:1,news:1,give:1,edu:1},
+  {name:"Babyganics", inf:1,ugc:1,news:1,give:1,edu:1},
+  {name:"Kirkland Signature", inf:0,ugc:0,news:0,give:0,edu:0},
+  {name:"up&up", inf:0,ugc:0,news:0,give:0,edu:0},
+  {name:"Dude Wipes", inf:1,ugc:1,news:1,give:1,edu:0},
+  {name:"Cottonelle", inf:0,ugc:1,news:1,give:0,edu:0},
+  {name:"Charmin", inf:0,ugc:1,news:1,give:0,edu:0},
+  {name:"Cetaphil Wipes", inf:1,ugc:1,news:1,give:1,edu:1},
+];
+
+const retention = [
+  {name:"WaterWipes", sub:"No", ship:"—", vol:"—", loyal:"No", bundle:"No", sample:"No"},
+  {name:"The Honest Company", sub:"Yes", ship:"$50+", vol:"10% off 3 / 15% off 5", loyal:"Yes", bundle:"Yes", sample:"Yes"},
+  {name:"Mama Bear", sub:"Yes", ship:"Free w/ Prime", vol:"10% / 15%", loyal:"No", bundle:"No", sample:"No"},
+  {name:"Coterie", sub:"Yes", ship:"$39+", vol:"10% off 3", loyal:"No", bundle:"Yes", sample:"Yes"},
+  {name:"Pampers", sub:"No", ship:"—", vol:"—", loyal:"Yes", bundle:"No", sample:"No"},
+  {name:"Huggies", sub:"No", ship:"—", vol:"—", loyal:"Yes", bundle:"No", sample:"No"},
+  {name:"Hello Bello", sub:"Yes", ship:"$35+", vol:"10% / 15%", loyal:"Yes", bundle:"Yes", sample:"No"},
+  {name:"Healthybaby", sub:"Yes", ship:"$50+", vol:"10% off 3", loyal:"No", bundle:"Yes", sample:"Yes"},
+  {name:"Seventh Generation", sub:"Yes", ship:"—", vol:"—", loyal:"No", bundle:"No", sample:"No"},
+  {name:"Burt's Bees Baby", sub:"No", ship:"$75+", vol:"10% off 3", loyal:"Yes", bundle:"Yes", sample:"No"},
+  {name:"Babyganics", sub:"Yes", ship:"—", vol:"—", loyal:"No", bundle:"No", sample:"No"},
+  {name:"Kirkland Signature", sub:"No", ship:"Free (Costco)", vol:"—", loyal:"No", bundle:"No", sample:"No"},
+  {name:"up&up", sub:"No", ship:"$35+", vol:"5% off 3", loyal:"No", bundle:"No", sample:"No"},
+  {name:"Dude Wipes", sub:"Yes", ship:"$30+", vol:"10% off 3", loyal:"No", bundle:"Yes", sample:"No"},
+  {name:"Cottonelle", sub:"No", ship:"—", vol:"—", loyal:"No", bundle:"No", sample:"No"},
+  {name:"Charmin", sub:"No", ship:"—", vol:"—", loyal:"No", bundle:"No", sample:"No"},
+  {name:"Cetaphil Wipes", sub:"No", ship:"—", vol:"Twin-pack discounts", loyal:"No", bundle:"Yes", sample:"Yes"},
+];
+
+const pricing48 = [
+  {name:"Kirkland Signature", price:3.49},{name:"up&up", price:3.49},{name:"Mama Bear", price:3.99},
+  {name:"Hello Bello", price:4.99},{name:"Babyganics", price:4.99},{name:"Pampers", price:5.99},
+  {name:"Huggies", price:5.99},{name:"WaterWipes", price:6.99},{name:"Seventh Generation", price:6.99},
+  {name:"The Honest Company", price:7.49},{name:"Burt's Bees Baby", price:7.49},{name:"Dude Wipes", price:7.99},
+  {name:"Cottonelle", price:7.99},{name:"Charmin", price:7.99},{name:"Coterie", price:9.99},{name:"Healthybaby", price:9.99},
+];
+
+const profitByChannel = [
+  {name:"Amazon", value:57000},{name:"Shopify", value:29400},{name:"TikTok", value:-36600},
+  {name:"Distributor", value:67719},{name:"Wholesale", value:38619},
+];
+
+const personas = [
+  {seg:"Fitness / Active Adults", tag:"Priority", pain:"Sweat/odor post-workout, no shower access.", motive:"Cooling, portability, on-the-go.", channel:"Instagram, TikTok, Gym Partnerships, DTC"},
+  {seg:"Newborn Parents", tag:null, pain:"Fear of harsh chemicals, irritation.", motive:"Pure, safe ingredients (99% water).", channel:"Instagram, TikTok, Amazon, Target"},
+  {seg:"Toddler Parents", tag:null, pain:"High-volume mess cleanup.", motive:"Durability, bulk pricing.", channel:"Amazon, Walmart, Target, Meta Ads"},
+  {seg:"Eco-Conscious", tag:null, pain:"Guilt over plastic/landfill waste.", motive:"Biodegradable, plant-based.", channel:"Organic Stores, DTC, Newsletters"},
+  {seg:"Sensitive Skin", tag:null, pain:"Redness/breakouts from standard wipes.", motive:"Hypoallergenic, fragrance-free.", channel:"Dermatologist recs, Amazon, Specialty"},
+  {seg:"Adult Personal Care", tag:null, pain:"Plumbing concerns, discomfort.", motive:"Cleanliness, flushability, discretion.", channel:"Amazon, Walmart, Target, DTC"},
+];
+
+const swotData = [
+  {name:"Cetaphil Wipes", s:["Dermatologist-recommended trust","Gentle, sensitive-skin positioning"], w:["High price","Not eco-positioned","Synthetic ingredients"], o:["Biodegradable line","Target Gen-Z"], t:["CeraVe, derm brands","Store-brand dupes"]},
+  {name:"Dude Wipes", s:["Only cooling/XL/deodorizing brand","Distinct voice","Flushable format"], w:["Flushability safety concerns","Thin material reported"], o:["Expand men's care"], t:["Regulatory change on flushability claims"]},
+  {name:"WaterWipes", s:["Clinical-purity equity","99.9% water"], w:["Premium price","Dispensing complaints"], o:["Extend into adult care"], t:["Private-label budget brands"]},
+  {name:"Coterie", s:["High perceived quality","Soft, durable"], w:["Very expensive","Subscription-only"], o:["International expansion"], t:["Economic downturn"]},
+];
+
+const phases = [
+  {name:"01 – Business Foundation", tasks:[
+    {task:"Partnership Agreement", owner:"Elaine", due:"8/15", status:"Not Started", signal:"—"},
+    {task:"Business Registration", owner:"Anthony Pong", due:"8/15", status:"Not Started", signal:"—"},
+    {task:"EIN", owner:"Anthony Pong", due:"8/15", status:"Not Started", signal:"—"},
+    {task:"Bank Account Opening", owner:"Long Tran", due:"8/15", status:"Not Started", signal:"Chaser due 6/30, thread active 6/29"},
+    {task:"Company Naming / Trademark / Domain", owner:"Anthony Pong", due:"8/31", status:"In Progress", signal:"unsweat.co purchased 4/11"},
+    {task:"Operating / Shareholder Agreement", owner:"Elaine", due:"6/20", status:"Not Started", signal:"Thread active 7/13"},
+    {task:"Company Structure", owner:"Elaine", due:"6/15", status:"Not Started", signal:"Thread active 7/13"},
+  ]},
+  {name:"02 – Packaging", tasks:[
+    {task:"Packaging Concepts", owner:"Nicole Baker", due:"8/10", status:"Completed", signal:"Final design approved 7/28"},
+    {task:"Brand Code", owner:"Anthony Pong", due:"8/10", status:"In Progress", signal:"—"},
+    {task:"Claims", owner:"Anthony Pong", due:"7/24", status:"Completed", signal:"Copy restrictions set 7/23"},
+    {task:"Compliance", owner:"Anthony Pong", due:"7/24", status:"Completed", signal:"Do Not Flush requirement confirmed 7/10"},
+    {task:"Barcode / UPC", owner:"Anthony Pong", due:"8/31", status:"Completed", signal:"884400729866 assigned 7/30"},
+  ]},
+  {name:"03 – Supplier & Manufacturing", tasks:[
+    {task:"Supplier Comparison", owner:"Anthony Pong", due:"8/31", status:"Completed", signal:"—"},
+    {task:"Formulation Compliance", owner:"Anthony Pong", due:"8/31", status:"In Progress", signal:"HOCl → Cetaphil pivot; samples under review 8/4"},
+    {task:"First Order", owner:"Anthony Pong", due:"—", status:"Not Started", signal:"Pending formulation sign-off"},
+    {task:"MOQ", owner:"Anthony Pong", due:"8/31", status:"Completed", signal:"30,000 units / 20-ct packs"},
+    {task:"Lead Times", owner:"Anthony Pong", due:"8/31", status:"Completed", signal:"—"},
+    {task:"Certifications (CE / FDA / GMPC)", owner:"Anthony Pong", due:"—", status:"Completed", signal:"Received 6/25"},
+    {task:"Quality Control Checklist", owner:"Nicole / Anthony", due:"6/30", status:"In Progress", signal:"Thread active 6/29"},
+  ]},
+  {name:"04 – Market Intelligence", tasks:[
+    {task:"Competitor Matrix", owner:"Elaine", due:"8/30", status:"Completed", signal:"First draft shared 7/30"},
+    {task:"Customer Personas & Pain Points", owner:"Elaine", due:"8/30", status:"Completed", signal:"—"},
+    {task:"Industry Trends", owner:"Elaine", due:"8/30", status:"In Progress", signal:"—"},
+    {task:"Market Differentiation Strategy", owner:"Elaine", due:"6/15", status:"In Progress", signal:"Thread active 8/4"},
+  ]},
+  {name:"05 – Costing & Pricing", tasks:[
+    {task:"Unit Economics", owner:"Elaine", due:"8/30", status:"In Progress", signal:"—"},
+    {task:"Pricing Recommendation", owner:"Elaine", due:"8/30", status:"In Progress", signal:"—"},
+    {task:"Competitor Pricing", owner:"Elaine", due:"8/30", status:"In Progress", signal:"Thread active 7/30"},
+    {task:"Inventory Plan", owner:"Elaine", due:"8/30", status:"In Progress", signal:"—"},
+    {task:"Additional wipe SKUs", owner:"Anthony / Andrew", due:"8/15", status:"In Progress", signal:"Cleaning vs. Cooling lines both active — thread 8/4"},
+  ]},
+  {name:"06 – Product Strategy", tasks:[
+    {task:"Product Brief", owner:"Andrew", due:"Q4", status:"Not Started", signal:"—"},
+    {task:"Value Proposition", owner:"Andrew", due:"Q4", status:"Not Started", signal:"—"},
+    {task:"Brand Guidelines", owner:"Nicole Baker", due:"9/10", status:"On Queue", signal:"—"},
+    {task:"Positioning", owner:"Andrew", due:"9/10", status:"On Queue", signal:"Cetaphil vs. cooling-fitness angle unresolved"},
+    {task:"Messaging", owner:"Andrew", due:"9/10", status:"On Queue", signal:"—"},
+  ]},
+  {name:"07 – Brand Assets", tasks:[
+    {task:"Product Photos", owner:"Nicole Baker", due:"—", status:"On Queue", signal:"Chased 5/28"},
+  ]},
+  {name:"08 – Amazon", tasks:[
+    {task:"Amazon Listing / Account Setup", owner:"Sam Dalal", due:"9/30", status:"In Progress", signal:"Chaser thread active today (8/6); chaser due date 8/28"},
+  ]},
+  {name:"09 – Organic Marketing", tasks:[
+    {task:"Shopify Website", owner:"Long / Sam", due:"10/30", status:"In Progress", signal:"Webflow direction proposed 4/11; thread active 8/4"},
+    {task:"Setup Social Media Accounts", owner:"Nicole Baker", due:"10/30", status:"In Progress", signal:"Chased 5/28, replied 6/2"},
+    {task:"Content Calendar", owner:"Nicole Baker", due:"10/30", status:"On Queue", signal:"—"},
+    {task:"Email Marketing Setup (Klaviyo)", owner:"Long Tran", due:"10/30", status:"On Queue", signal:"—"},
+  ]},
+  {name:"10 – Paid Ads", tasks:[
+    {task:"Setup Google Ads", owner:"Sam Dalal", due:"10/30", status:"On Queue", signal:"—"},
+    {task:"Setup Meta Ads", owner:"Andrew", due:"10/30", status:"On Queue", signal:"—"},
+    {task:"Launch Google Ads", owner:"Sam Dalal", due:"10/30", status:"On Queue", signal:"—"},
+    {task:"Launch Facebook Ads", owner:"Andrew", due:"10/30", status:"On Queue", signal:"—"},
+  ]},
+];
+
+/* ---------------- RENDER: PHASES ---------------- */
+const phaseContainer = document.getElementById('phase-container');
+phases.forEach(ph=>{
+  const done = ph.tasks.filter(t=>t.status==='Completed').length;
+  const block = document.createElement('div');
+  block.className = 'phase-block';
+  const rows = ph.tasks.map(t=>{
+    const statusClass = 'status-' + t.status.replace(' ', '-');
+    return `<tr><td>${t.task}</td><td>${t.owner}</td><td>${t.due}</td><td><span class="status-badge ${statusClass}">${t.status}</span></td><td class="signal">${t.signal}</td></tr>`;
+  }).join('');
+  block.innerHTML = `
+    <div class="phase-block-head">
+      <div class="ph-name">${ph.name}</div>
+      <div class="ph-progress">${done}/${ph.tasks.length} complete</div>
+    </div>
+    <table class="task-table">
+      <thead><tr><th>Task</th><th>Owner</th><th>Due</th><th>Status</th><th>Latest signal (Slack)</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+  phaseContainer.appendChild(block);
+});
+
+/* ---------------- GENERIC BOOLEAN MATRIX RENDERER ---------------- */
+function renderBoolMatrix(tbodyId, data, keys, opKeys){
+  const tbody = document.getElementById(tbodyId);
+  data.forEach(row=>{
+    const tr = document.createElement('tr');
+    let cells = `<td class="brand-name">${row.name}</td>`;
+    keys.forEach(k=>{
+      const isOp = opKeys && opKeys.includes(k);
+      cells += `<td class="${isOp?'op-cell':''}"><span class="dot ${row[k] ? (isOp?'op-on':'on') : ''}"></span></td>`;
+    });
+    tr.innerHTML = cells;
+    tbody.appendChild(tr);
+  });
+}
+renderBoolMatrix('matrix-body', competitors, ['water','plant','frag','sens','ewg','xl','cool','deo','wrap'], ['xl','cool','deo','wrap']);
+renderBoolMatrix('ingredient-body', ingredients, ['water','aloe','cham','glyc','citric','vite','oat','cuke']);
+renderBoolMatrix('channel-body', channels, ['amazon','walmart','target','dtc']);
+renderBoolMatrix('paidads-body', paidAds, ['amazon','meta','google','tiktok','tv']);
+renderBoolMatrix('engagement-body', engagement, ['inf','ugc','news','give','edu']);
+
+/* ---------------- RETENTION TABLE ---------------- */
+const retentionBody = document.getElementById('retention-body');
+retention.forEach(r=>{
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td>${r.name}</td><td>${r.sub}</td><td>${r.ship}</td><td>${r.vol}</td><td>${r.loyal}</td><td>${r.bundle}</td><td>${r.sample}</td>`;
+  retentionBody.appendChild(tr);
+});
+
+/* ---------------- RENDER: PRICE CHART ---------------- */
+const priceBox = document.getElementById('price-chart');
+const maxPrice = Math.max(...pricing48.map(p=>p.price));
+pricing48.forEach(p=>{
+  const row = document.createElement('div');
+  row.className = 'bar-row';
+  const pct = (p.price/maxPrice*100).toFixed(1);
+  const isGold = p.name === "Dude Wipes";
+  row.innerHTML = `<div class="label">${p.name}</div><div class="track"><div class="fill ${isGold?'gold':''}" style="width:${pct}%"></div></div><div class="val">$${p.price.toFixed(2)}</div>`;
+  priceBox.appendChild(row);
+});
+
+/* ---------------- RENDER: PROFIT CHART ---------------- */
+const profitBox = document.getElementById('profit-chart');
+const maxAbsProfit = Math.max(...profitByChannel.map(p=>Math.abs(p.value)));
+profitByChannel.forEach(p=>{
+  const row = document.createElement('div');
+  row.className = 'bar-row';
+  const pct = (Math.abs(p.value)/maxAbsProfit*100).toFixed(1);
+  const isLoss = p.value < 0;
+  row.innerHTML = `<div class="label">${p.name}</div><div class="track"><div class="fill ${isLoss?'clay':''}" style="width:${pct}%"></div></div><div class="val" style="${isLoss?'color:var(--clay);':''}">${isLoss?'-':''}$${Math.abs(p.value).toLocaleString()}</div>`;
+  profitBox.appendChild(row);
+});
+
+/* ---------------- RENDER: PERSONAS ---------------- */
+const personaGrid = document.getElementById('persona-grid');
+personas.forEach(p=>{
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.style.borderLeft = p.tag ? '4px solid var(--gold)' : '1px solid var(--line)';
+  card.innerHTML = `<div class="kicker">${p.tag?p.tag:'Segment'}</div><h4>${p.seg}</h4>
+    <ul><li>${p.pain}</li><li>${p.motive}</li><li>${p.channel}</li></ul>`;
+  personaGrid.appendChild(card);
+});
+
+/* ---------------- RENDER: SWOT ---------------- */
+const swotGrid = document.getElementById('swot-grid');
+swotData.forEach(b=>{
+  const card = document.createElement('div');
+  card.className = 'card';
+  const listify = arr => `<ul style="padding-left:14px;">${arr.map(i=>`<li style="font-size:12px;">${i}</li>`).join('')}</ul>`;
+  card.innerHTML = `<h4>${b.name}</h4>
+    <div class="grid grid-2" style="gap:8px;margin-top:6px;">
+      <div><div class="kicker" style="color:#3D7A56;">Strengths</div>${listify(b.s)}</div>
+      <div><div class="kicker" style="color:var(--clay);">Weaknesses</div>${listify(b.w)}</div>
+      <div><div class="kicker" style="color:var(--teal);">Opportunities</div>${listify(b.o)}</div>
+      <div><div class="kicker" style="color:#96762E;">Threats</div>${listify(b.t)}</div>
+    </div>`;
+  swotGrid.appendChild(card);
+});
+
+/* ---------------- PAGE NAVIGATION ---------------- */
+const navItems = Array.from(document.querySelectorAll('.toc .item'));
+const pages = Array.from(document.querySelectorAll('.page'));
+navItems.forEach(item=>{
+  item.addEventListener('click', ()=>{
+    navItems.forEach(i=>i.classList.remove('active'));
+    pages.forEach(p=>p.classList.remove('active'));
+    item.classList.add('active');
+    document.getElementById('page-'+item.dataset.target).classList.add('active');
+    window.scrollTo(0,0);
+  });
+});
+
+/* ---------------- MARKET LANDSCAPE SUB-TABS ---------------- */
+const subtabBtns = Array.from(document.querySelectorAll('.subtab-btn'));
+const subtabPanels = Array.from(document.querySelectorAll('.subtab-panel'));
+subtabBtns.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    subtabBtns.forEach(b=>b.classList.remove('active'));
+    subtabPanels.forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+  });
+});
+</script>
+</body>
+</html>
